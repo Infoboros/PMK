@@ -1,22 +1,10 @@
-org 500h
-	; Символы клавиатуры
-	db 23h, 30h, 02ah, 39h, 38h, 37h, 36h, 35h, 34h, 33h, 32h, 31h
-
 ORG 0
-
 	JMP main
 
 ; обработчик прерывания int1
 org 13h	; int1
-	setb p0.0
-	setb p0.1
-	setb p0.2
-	setb p0.3	
 	call scanKeyBoard
-	CLR p0.0
-	CLR p0.1
-	CLR p0.2
-	CLR p0.3
+	mov p0, #0
 	reti
 
 org 030h
@@ -38,27 +26,29 @@ main:
 	SETB IT1 ; по срезу
 	SETB EX1 ; прерывание от INT1
 	SETB EA	; разрешить все прерывания
-	mov dptr, #500h
-	; Устанавливаем в порте 0, чтобы ждать прерывания при нажатии
-	CLR p0.0
-	CLR p0.1
-	CLR p0.2
-	CLR p0.3
+	
+; Устанавливаем в порте 0, чтобы ждать прерывания при нажатии
+	mov p0, #0
 ; Бесконечный пустой цикл
 	sjmp $
 	
 ; Сканирование по рядам
 scanKeyBoard:
-	mov p0, #11110111b
+	mov p0, #11111111b
+
+	clr p0.3
  	CALL scanRow1
 
-	mov p0, #11111011b
+	setb p0.3
+	clr  p0.2
  	CALL scanRow2
  	
-	mov p0, #11111101b
+	setb p0.2
+	clr  p0.1
  	CALL scanRow3
  	
-	mov p0, #11111110b
+	setb p0.1
+	clr  p0.0
  	CALL scanRow4
 
 	ret
